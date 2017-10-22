@@ -2,10 +2,18 @@
   "name": "pounder-firebase",
   "version": "1.0.0",
   "description": "Firebase Backend API for pounder",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Charlie9830/pounder-firebase.git"
+  },
   "main": "index.js",
   "scripts": {
     "test": "npm run dev"
   },
+  "private": true,
   "author": "Charlie Hall",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "firebase": "^4.6.0"
+  }
 }
