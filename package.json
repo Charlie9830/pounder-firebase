@@ -1,0 +1,11 @@
+{
+  "name": "pounder-firebase",
+  "version": "1.0.0",
+  "description": "Firebase Backend API for pounder",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run dev"
+  },
+  "author": "Charlie Hall",
+  "license": "MIT"
+}
