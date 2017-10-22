@@ -19,7 +19,7 @@ export function getFirestore() {
     }
 }
 
-export function setupFirestore(mode) {
+export function setupFirebase(mode) {
     if (mode === "development") {
         // Development Database.
         var config = {
