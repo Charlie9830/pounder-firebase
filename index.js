@@ -1,10 +1,6 @@
 import Firebase from 'firebase';
 require('firebase/firestore');
-
-// Firestore.
-let Firestore = Firebase.firestore();
-Firestore.enablePersistence();
-
+var firestore = null;
 var isSetup = false;
 
 
@@ -15,7 +11,7 @@ export function getFirestore() {
     }
 
     else {
-        return Firestore;
+        return firestore;
     }
 }
 
@@ -30,7 +26,10 @@ export function setupFirebase(mode) {
             storageBucket: "halo-todo.appspot.com",
             messagingSenderId: "801359392837"
         };
+
         Firebase.initializeApp(config);
+        firestore = Firebase.firestore();
+        firestore.enablePersistence();
         isSetup = true;
     }
 
@@ -44,7 +43,10 @@ export function setupFirebase(mode) {
             storageBucket: "",
             messagingSenderId: "759706234917"
         };
+
         Firebase.initializeApp(config);
+        firestore = Firebase.firestore();
+        firestore.enablePersistence();
         isSetup = true;
     }
 }
