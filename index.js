@@ -15,6 +15,16 @@ export function getFirestore() {
     }
 }
 
+export function getAuth() {
+    if (isSetup === false) {
+        throw "Firebase has not been Setup yet. Call setupFirestore() with either development or production mode first"
+    }
+
+    else {
+        return Firebase.auth();
+    }
+}
+
 export function setupFirebase(mode) {
     if (mode === "development") {
         // Development Database.
