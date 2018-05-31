@@ -66,3 +66,4 @@ export const TASKS = "tasks";
 export const TASKLISTS = "taskLists";
 export const PROJECTS = "projects";
 export const PROJECTLAYOUTS = "projectLayouts";
+export const ACCOUNT = "account";
