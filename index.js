@@ -67,3 +67,4 @@ export const TASKLISTS = "taskLists";
 export const PROJECTS = "projects";
 export const PROJECTLAYOUTS = "projectLayouts";
 export const ACCOUNT = "account";
+export const ACCOUNT_DOC_ID = "primary";
