@@ -1,6 +1,8 @@
-import Firebase from 'firebase';
-require('firebase/firestore');
-var firestore = null;
+import firebase from 'firebase/app';
+import 'firebase/firestore';
+import 'firebase/auth';
+let auth = null;
+let firestore = null;
 var isSetup = false;
 
 
@@ -21,7 +23,7 @@ export function getAuth() {
     }
 
     else {
-        return Firebase.auth();
+        return auth;
     }
 }
 
@@ -37,9 +39,16 @@ export function setupFirebase(mode) {
             messagingSenderId: "801359392837"
         };
 
-        Firebase.initializeApp(config);
-        firestore = Firebase.firestore();
+        firebase.initializeApp(config);
+
+        firestore = firebase.firestore();
+        auth = firebase.auth();
+
+        // Settings.
+        const settings = { timestampsInSnapshots: true};
+        firestore.settings(settings);
         firestore.enablePersistence();
+
         isSetup = true;
     }
 
@@ -54,11 +63,23 @@ export function setupFirebase(mode) {
             messagingSenderId: "759706234917"
         };
 
-        Firebase.initializeApp(config);
-        firestore = Firebase.firestore();
+        firebase.initializeApp(config);
+
+        firestore = firebase.firestore();
+        auth = firebase.auth();
+
+        // Settings.
+        const settings = { timestampsInSnapshots: true};
+        firestore.settings(settings);
         firestore.enablePersistence();
+
         isSetup = true;
     }
+}
+
+// Account Config Fallback Value.
+export const AccountConfigFallback = {
+    favouriteProjectId: -1,
 }
 
 // Firestore Collection Paths.
