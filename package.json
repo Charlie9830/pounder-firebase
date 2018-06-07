@@ -8,12 +8,16 @@
   },
   "main": "index.js",
   "scripts": {
-    "test": "npm run dev"
+    "test": "npm run dev",
+    "build": "babel ./src/index.js --out-file ./index.js"
   },
   "private": true,
   "author": "Charlie Hall",
   "license": "MIT",
   "dependencies": {
-    "firebase": "^5.0.4"
-  }
+    "firebase": "^5.0.4",
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.1"
+  },
+  "devDependencies": {}
 }

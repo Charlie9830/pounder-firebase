@@ -1,33 +1,45 @@
-import firebase from 'firebase/app';
-import 'firebase/firestore';
-import 'firebase/auth';
-let auth = null;
-let firestore = null;
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.ACCOUNT_DOC_ID = exports.ACCOUNT = exports.PROJECTLAYOUTS = exports.PROJECTS = exports.TASKLISTS = exports.TASKS = exports.AccountConfigFallback = undefined;
+exports.getFirestore = getFirestore;
+exports.getAuth = getAuth;
+exports.setupFirebase = setupFirebase;
+
+var _app = require('firebase/app');
+
+var _app2 = _interopRequireDefault(_app);
+
+require('firebase/firestore');
+
+require('firebase/auth');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var auth = null;
+var firestore = null;
 var isSetup = false;
 
-
 // Exports
-export function getFirestore() {
+function getFirestore() {
     if (isSetup === false) {
         throw "Firestore has not been Setup yet. Call setupFirestore() with either development or production mode first";
-    }
-
-    else {
+    } else {
         return firestore;
     }
 }
 
-export function getAuth() {
+function getAuth() {
     if (isSetup === false) {
-        throw "Firebase has not been Setup yet. Call setupFirestore() with either development or production mode first"
-    }
-
-    else {
+        throw "Firebase has not been Setup yet. Call setupFirestore() with either development or production mode first";
+    } else {
         return auth;
     }
 }
 
-export function setupFirebase(mode) {
+function setupFirebase(mode) {
     if (mode === "development") {
         // Development Database.
         var config = {
@@ -39,13 +51,13 @@ export function setupFirebase(mode) {
             messagingSenderId: "801359392837"
         };
 
-        firebase.initializeApp(config);
+        _app2.default.initializeApp(config);
 
-        firestore = firebase.firestore();
-        auth = firebase.auth();
+        firestore = _app2.default.firestore();
+        auth = _app2.default.auth();
 
         // Settings.
-        const settings = { timestampsInSnapshots: true};
+        var settings = { timestampsInSnapshots: true };
         firestore.settings(settings);
         firestore.enablePersistence();
 
@@ -63,14 +75,14 @@ export function setupFirebase(mode) {
             messagingSenderId: "759706234917"
         };
 
-        firebase.initializeApp(config);
+        _app2.default.initializeApp(config);
 
-        firestore = firebase.firestore();
-        auth = firebase.auth();
+        firestore = _app2.default.firestore();
+        auth = _app2.default.auth();
 
         // Settings.
-        const settings = { timestampsInSnapshots: true};
-        firestore.settings(settings);
+        var _settings = { timestampsInSnapshots: true };
+        firestore.settings(_settings);
         firestore.enablePersistence();
 
         isSetup = true;
@@ -78,14 +90,13 @@ export function setupFirebase(mode) {
 }
 
 // Account Config Fallback Value.
-export const AccountConfigFallback = {
-    favouriteProjectId: -1,
-}
+var AccountConfigFallback = exports.AccountConfigFallback = {
+    favouriteProjectId: -1
 
-// Firestore Collection Paths.
-export const TASKS = "tasks";
-export const TASKLISTS = "taskLists";
-export const PROJECTS = "projects";
-export const PROJECTLAYOUTS = "projectLayouts";
-export const ACCOUNT = "account";
-export const ACCOUNT_DOC_ID = "primary";
+    // Firestore Collection Paths.
+};var TASKS = exports.TASKS = "tasks";
+var TASKLISTS = exports.TASKLISTS = "taskLists";
+var PROJECTS = exports.PROJECTS = "projects";
+var PROJECTLAYOUTS = exports.PROJECTLAYOUTS = "projectLayouts";
+var ACCOUNT = exports.ACCOUNT = "account";
+var ACCOUNT_DOC_ID = exports.ACCOUNT_DOC_ID = "primary";
