@@ -1,8 +1,10 @@
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 import 'firebase/auth';
+import 'firebase/functions';
 let auth = null;
 let firestore = null;
+let functions = null;
 var isSetup = false;
 
 
@@ -27,6 +29,16 @@ export function getAuth() {
     }
 }
 
+export function getFunctions() {
+    if (isSetup === false) {
+        throw "Firebase has not been Setup yet. Call setupFirestore() with either development or production mode first"
+    }
+
+    else {
+        return functions;
+    }
+}
+
 export function setupFirebase(mode) {
     if (mode === "development") {
         // Development Database.
@@ -43,6 +55,7 @@ export function setupFirebase(mode) {
 
         firestore = firebase.firestore();
         auth = firebase.auth();
+        functions = firebase.functions();
 
         // Settings.
         const settings = { timestampsInSnapshots: true};
@@ -53,20 +66,21 @@ export function setupFirebase(mode) {
     }
 
     if (mode === "production") {
-        // Production DB
+        // Production DB 2.
         var config = {
-            apiKey: "AIzaSyC73TEUhmgaV2h4Ml3hF4VAYnm9oUCapFM",
-            authDomain: "pounder-production.firebaseapp.com",
-            databaseURL: "https://pounder-production.firebaseio.com",
-            projectId: "pounder-production",
-            storageBucket: "",
-            messagingSenderId: "759706234917"
-        };
+            apiKey: "AIzaSyCXdE8p5AXpaqQ_RhcJp8TUwHOqSYPcYnU",
+            authDomain: "pounder-production2.firebaseapp.com",
+            databaseURL: "https://pounder-production2.firebaseio.com",
+            projectId: "pounder-production2",
+            storageBucket: "pounder-production2.appspot.com",
+            messagingSenderId: "553455457889"
+          };
 
         firebase.initializeApp(config);
 
         firestore = firebase.firestore();
         auth = firebase.auth();
+        functions = firebase.functions();
 
         // Settings.
         const settings = { timestampsInSnapshots: true};
@@ -83,9 +97,28 @@ export const AccountConfigFallback = {
 }
 
 // Firestore Collection Paths.
+let userUid = "";
+
+export function setUserUid(uid) {
+    userUid = uid;
+}
+
+export function getUserUid() {
+    return userUid;
+}
+
+
+// Be Sure to Add any Paths here to Cloud Functions as well until you are able to
+// import these without taking everything else as well.
+export const DIRECTORY = "directory";
+export const USERS = "users";
 export const TASKS = "tasks";
 export const TASKLISTS = "taskLists";
 export const PROJECTS = "projects";
 export const PROJECTLAYOUTS = "projectLayouts";
 export const ACCOUNT = "account";
 export const ACCOUNT_DOC_ID = "primary";
+export const INVITES = 'invites';
+export const REMOTES = 'remotes';
+export const REMOTE_IDS = 'remoteIds';
+export const MEMBERS = 'members';

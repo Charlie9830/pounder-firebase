@@ -15,9 +15,20 @@
   "author": "Charlie Hall",
   "license": "MIT",
   "dependencies": {
-    "firebase": "^5.0.4",
     "babel-cli": "^6.26.0",
-    "babel-preset-env": "^1.6.1"
+    "babel-preset-env": "^1.6.1",
+    "firebase": "^5.0.4",
+    "firebase-admin": "^5.12.1",
+    "firebase-functions": "^1.1.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "babel-webpack-plugin": "^0.1.1",
+    "eslint": "^5.0.0",
+    "eslint-config-standard": "^11.0.0",
+    "eslint-plugin-import": "^2.12.0",
+    "eslint-plugin-node": "^6.0.1",
+    "eslint-plugin-promise": "^3.8.0",
+    "eslint-plugin-standard": "^3.1.0",
+    "webpack": "^4.12.1"
+  }
 }

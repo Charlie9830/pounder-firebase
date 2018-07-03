@@ -3,10 +3,13 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.ACCOUNT_DOC_ID = exports.ACCOUNT = exports.PROJECTLAYOUTS = exports.PROJECTS = exports.TASKLISTS = exports.TASKS = exports.AccountConfigFallback = undefined;
+exports.MEMBERS = exports.REMOTE_IDS = exports.REMOTES = exports.INVITES = exports.ACCOUNT_DOC_ID = exports.ACCOUNT = exports.PROJECTLAYOUTS = exports.PROJECTS = exports.TASKLISTS = exports.TASKS = exports.USERS = exports.DIRECTORY = exports.AccountConfigFallback = undefined;
 exports.getFirestore = getFirestore;
 exports.getAuth = getAuth;
+exports.getFunctions = getFunctions;
 exports.setupFirebase = setupFirebase;
+exports.setUserUid = setUserUid;
+exports.getUserUid = getUserUid;
 
 var _app = require('firebase/app');
 
@@ -16,10 +19,13 @@ require('firebase/firestore');
 
 require('firebase/auth');
 
+require('firebase/functions');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var auth = null;
 var firestore = null;
+var functions = null;
 var isSetup = false;
 
 // Exports
@@ -39,6 +45,14 @@ function getAuth() {
     }
 }
 
+function getFunctions() {
+    if (isSetup === false) {
+        throw "Firebase has not been Setup yet. Call setupFirestore() with either development or production mode first";
+    } else {
+        return functions;
+    }
+}
+
 function setupFirebase(mode) {
     if (mode === "development") {
         // Development Database.
@@ -55,6 +69,7 @@ function setupFirebase(mode) {
 
         firestore = _app2.default.firestore();
         auth = _app2.default.auth();
+        functions = _app2.default.functions();
 
         // Settings.
         var settings = { timestampsInSnapshots: true };
@@ -65,20 +80,21 @@ function setupFirebase(mode) {
     }
 
     if (mode === "production") {
-        // Production DB
+        // Production DB 2.
         var config = {
-            apiKey: "AIzaSyC73TEUhmgaV2h4Ml3hF4VAYnm9oUCapFM",
-            authDomain: "pounder-production.firebaseapp.com",
-            databaseURL: "https://pounder-production.firebaseio.com",
-            projectId: "pounder-production",
-            storageBucket: "",
-            messagingSenderId: "759706234917"
+            apiKey: "AIzaSyCXdE8p5AXpaqQ_RhcJp8TUwHOqSYPcYnU",
+            authDomain: "pounder-production2.firebaseapp.com",
+            databaseURL: "https://pounder-production2.firebaseio.com",
+            projectId: "pounder-production2",
+            storageBucket: "pounder-production2.appspot.com",
+            messagingSenderId: "553455457889"
         };
 
         _app2.default.initializeApp(config);
 
         firestore = _app2.default.firestore();
         auth = _app2.default.auth();
+        functions = _app2.default.functions();
 
         // Settings.
         var _settings = { timestampsInSnapshots: true };
@@ -94,9 +110,27 @@ var AccountConfigFallback = exports.AccountConfigFallback = {
     favouriteProjectId: -1
 
     // Firestore Collection Paths.
-};var TASKS = exports.TASKS = "tasks";
+};var userUid = "";
+
+function setUserUid(uid) {
+    userUid = uid;
+}
+
+function getUserUid() {
+    return userUid;
+}
+
+// Be Sure to Add any Paths here to Cloud Functions as well until you are able to
+// import these without taking everything else as well.
+var DIRECTORY = exports.DIRECTORY = "directory";
+var USERS = exports.USERS = "users";
+var TASKS = exports.TASKS = "tasks";
 var TASKLISTS = exports.TASKLISTS = "taskLists";
 var PROJECTS = exports.PROJECTS = "projects";
 var PROJECTLAYOUTS = exports.PROJECTLAYOUTS = "projectLayouts";
 var ACCOUNT = exports.ACCOUNT = "account";
 var ACCOUNT_DOC_ID = exports.ACCOUNT_DOC_ID = "primary";
+var INVITES = exports.INVITES = 'invites';
+var REMOTES = exports.REMOTES = 'remotes';
+var REMOTE_IDS = exports.REMOTE_IDS = 'remoteIds';
+var MEMBERS = exports.MEMBERS = 'members';
