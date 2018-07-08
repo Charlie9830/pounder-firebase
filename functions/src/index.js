@@ -124,10 +124,48 @@ exports.kickUserFromProject = functions.https.onCall((data, context) => {
     })
 })
 
+exports.kickAllUsersFromProject = functions.https.onCall((data, context) => {
+    var projectId = data.projectId;
+    return admin.firestore().collection(REMOTES).doc(projectId).collection(MEMBERS).get().then(snapshot => {
+        if (snapshot.empty !== true) {
+            // Build a Batch.
+            var batch = admin.firestore().batch();
+            snapshot.forEach(doc => {
+                batch.delete(admin.firestore().collection(REMOTES).doc(projectId).collection(MEMBERS).doc(doc.id));
+                batch.delete(admin.firestore().collection(USERS).doc(doc.id).collection(REMOTE_IDS).doc(projectId));
+                batch.delete(admin.firestore().collection(USERS).doc(doc.id).collection(INVITES).doc(projectId));
+            })
+
+            // Commit.
+            return batch.commit().then(() => {
+                return { status: 'complete' }
+            }).catch(error => {
+                return {
+                    status: 'error',
+                    message: 'Error occured while Kicking user: ' + error.message
+                }
+            })
+        }
+
+        else {
+            return { 
+                status: 'error',
+                message: 'Project has no contributors to kick.' }
+        }
+    })
+
+    var batch = admin.firestore().batch();
+    batch.delete(admin.firestore().collection(REMOTES).doc(projectId).collection(MEMBERS).doc(userId));
+    batch.delete(admin.firestore().collection(USERS).doc(userId).collection(REMOTE_IDS).doc(projectId));
+    batch.delete(admin.firestore().collection(USERS).doc(userId).collection(INVITES).doc(projectId));
+
+    
+})
+
 exports.acceptProjectInvite = functions.https.onCall((data,context) => {
     var projectId = data.projectId;
     var userId = context.auth.uid;
-    
+
     var batch = admin.firestore().batch();
     var memberRef = admin.firestore().collection(REMOTES).doc(projectId).collection(MEMBERS).doc(userId);
     batch.update(memberRef, {status: 'added' });
@@ -158,6 +196,26 @@ exports.denyProjectInvite = functions.https.onCall((data, context) => {
             status: 'error',
             message: 'Error occured whilst denying project invite.' + error.message,
         }
+    })
+})
+
+exports.removeRemoteProject = functions.https.onCall((data, context) => {
+    var projectId = data.projectId;
+    var userId = context.auth.uid;
+
+    // Build Updates.
+    var batch = admin.firestore().batch();
+    batch.delete(admin.firestore().collection(REMOTES).doc(projectId));
+    batch.delete(admin.firestore().collection(USERS).doc(userId).collection(REMOTE_IDS).doc(projectId));
+
+    // Execute the Batch.
+    return batch.commit().then(() => {
+        return { status: 'complete' }
+    }).catch(error => {
+        return { 
+        status: 'error',
+        message: error.message
+    }
     })
 })
 
