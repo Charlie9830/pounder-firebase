@@ -9,7 +9,7 @@
   "main": "index.js",
   "scripts": {
     "test": "npm run dev",
-    "build": "babel ./src/index.js --out-file ./index.js"
+    "build": "babel ./src/index.js --out-file ./index.js && babel ./src/paths/index.js --out-file ./paths/index.js"
   },
   "private": true,
   "author": "Charlie Hall",
@@ -21,6 +21,7 @@
     "firebase-admin": "^5.12.1",
     "firebase-functions": "^1.1.0"
   },
+
   "devDependencies": {
     "babel-webpack-plugin": "^0.1.1",
     "eslint": "^5.0.0",

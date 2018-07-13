@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.MEMBERS = exports.REMOTE_IDS = exports.REMOTES = exports.INVITES = exports.ACCOUNT_DOC_ID = exports.ACCOUNT = exports.PROJECTLAYOUTS = exports.PROJECTS = exports.TASKLISTS = exports.TASKS = exports.USERS = exports.DIRECTORY = exports.AccountConfigFallback = undefined;
+exports.AccountConfigFallback = undefined;
 exports.getFirestore = getFirestore;
 exports.getAuth = getAuth;
 exports.getFunctions = getFunctions;
@@ -119,18 +119,3 @@ function setUserUid(uid) {
 function getUserUid() {
     return userUid;
 }
-
-// Be Sure to Add any Paths here to Cloud Functions as well until you are able to
-// import these without taking everything else as well.
-var DIRECTORY = exports.DIRECTORY = "directory";
-var USERS = exports.USERS = "users";
-var TASKS = exports.TASKS = "tasks";
-var TASKLISTS = exports.TASKLISTS = "taskLists";
-var PROJECTS = exports.PROJECTS = "projects";
-var PROJECTLAYOUTS = exports.PROJECTLAYOUTS = "projectLayouts";
-var ACCOUNT = exports.ACCOUNT = "account";
-var ACCOUNT_DOC_ID = exports.ACCOUNT_DOC_ID = "primary";
-var INVITES = exports.INVITES = 'invites';
-var REMOTES = exports.REMOTES = 'remotes';
-var REMOTE_IDS = exports.REMOTE_IDS = 'remoteIds';
-var MEMBERS = exports.MEMBERS = 'members';

@@ -8,37 +8,16 @@
     | **************************************************
     */
 import { DirectoryStore, InviteStore, MemberStore } from 'pounder-stores';
+import { DIRECTORY, USERS, TASKS, TASKLISTS, PROJECTLAYOUTS, INVITES, REMOTES, REMOTE_IDS, MEMBERS } from '../../paths';
+import FirestoreBatchPaginator from 'firestore-batch-paginator';
 
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-
-// Reference Paths.
-export const DIRECTORY = "directory";
-export const USERS = "users";
-export const TASKS = "tasks";
-export const TASKLISTS = "taskLists";
-export const PROJECTS = "projects";
-export const PROJECTLAYOUTS = "projectLayouts";
-export const ACCOUNT = "account";
-export const ACCOUNT_DOC_ID = "primary";
-export const INVITES = 'invites';
-export const REMOTES = 'remotes';
-export const REMOTE_IDS = 'remoteIds';
-export const MEMBERS = 'members';
 
 admin.initializeApp({
     credential: admin.credential.applicationDefault(),
     databaseURL: 'https://halo-todo.firebaseio.com'
 });
-
-exports.addUserToDirectory = functions.auth.user().onCreate((user) => {
-    admin.firestore().collection(DIRECTORY).doc(user.email).set(Object.assign({}, new DirectoryStore(
-        user.email.toLowerCase(),
-        user.displayName,
-        user.uid))).then(() => {
-        // Complete.
-    })
-})
 
 exports.removeUserFromDirectory = functions.auth.user().onDelete((user) => {
     admin.firestore().collection(DIRECTORY).doc(user.email).delete().then(() => {
@@ -162,23 +141,42 @@ exports.kickAllUsersFromProject = functions.https.onCall((data, context) => {
     
 })
 
-exports.acceptProjectInvite = functions.https.onCall((data,context) => {
+exports.acceptProjectInvite = functions.https.onCall((data, context) => {
     var projectId = data.projectId;
     var userId = context.auth.uid;
 
-    var batch = admin.firestore().batch();
-    var memberRef = admin.firestore().collection(REMOTES).doc(projectId).collection(MEMBERS).doc(userId);
-    batch.update(memberRef, {status: 'added' });
-    
-    var remoteIdsRef = admin.firestore().collection(USERS).doc(userId).collection(REMOTE_IDS).doc(projectId);
-    batch.set(remoteIdsRef, {projectId: projectId} );
+    // Check that the Current user still exists in the Remote Project's Member Collection.
+    return admin.firestore().collection(REMOTES).doc(projectId).collection(MEMBERS).get().then(snapshot => {
+        var members = [];
+        snapshot.forEach(doc => {
+            members.push(doc.data());
+        })
 
-    return batch.commit().then( () => {
-        return { status: 'complete' }
+        var memberIndex = members.findIndex(item => {
+            return item.userId === userId;
+        })
+
+        if (memberIndex !== -1) {
+            var batch = admin.firestore().batch();
+            var memberRef = admin.firestore().collection(REMOTES).doc(projectId).collection(MEMBERS).doc(userId);
+            batch.update(memberRef, { status: 'added' });
+
+            var remoteIdsRef = admin.firestore().collection(USERS).doc(userId).collection(REMOTE_IDS).doc(projectId);
+            batch.set(remoteIdsRef, { projectId: projectId });
+
+            return batch.commit().then(() => {
+                return { status: 'complete' }
+            }).catch(error => {
+                return {
+                    status: 'error',
+                    message: 'Error occured while accepting project invite. ' + error.message,
+                }
+            })
+        }
     }).catch(error => {
         return {
             status: 'error',
-            message: 'Error occured accepting project invite. ' + error.message,
+            message: 'Error occured while validating project invite. ' + error.message,
         }
     })
 })
@@ -203,20 +201,92 @@ exports.removeRemoteProject = functions.https.onCall((data, context) => {
     var projectId = data.projectId;
     var userId = context.auth.uid;
 
-    // Build Updates.
-    var batch = admin.firestore().batch();
-    batch.delete(admin.firestore().collection(REMOTES).doc(projectId));
-    batch.delete(admin.firestore().collection(USERS).doc(userId).collection(REMOTE_IDS).doc(projectId));
+    // Delete Project
+    var requests = [];
+    var projectLayoutRefs = [];
+    var taskListRefs = [];
+    var taskRefs = [];
+    var memberIds = [];
+    var memberRefs = [];
+    var initialRef = admin.firestore().collection(REMOTES).doc(projectId);
 
-    // Execute the Batch.
-    return batch.commit().then(() => {
-        return { status: 'complete' }
-    }).catch(error => {
-        return { 
-        status: 'error',
-        message: error.message
-    }
-    })
+    // Project Layouts.
+    requests.push(initialRef.collection(PROJECTLAYOUTS).get().then( snapshot => {
+        snapshot.forEach(doc => {
+            projectLayoutRefs.push(doc.ref);
+        })
+    }))
+
+    // TaskLists.
+    requests.push(initialRef.collection(TASKLISTS).get().then( snapshot => {
+        snapshot.forEach(doc => {
+            taskListRefs.push(doc.ref);
+        })
+    }))
+
+    // Tasks.
+    requests.push(initialRef.collection(TASKS).get().then( snapshot => {
+        snapshot.forEach(doc => {
+            taskRefs.push(doc.ref);
+        })
+    }))
+
+    // Members
+    requests.push(initialRef.collection(MEMBERS).get().then( snapshot => {
+        snapshot.forEach(doc => {
+            memberRefs.push(doc.ref);
+            memberIds.push(doc.id);
+        })
+    }))
+
+    return Promise.all(requests).then(() => {
+        // Build Batch.
+        var batch = new FirestoreBatchPaginator(admin.firestore());
+
+        // Project Layouts
+        projectLayoutRefs.forEach(ref => {
+            batch.delete(ref);
+        })
+
+        // Task Lists.
+        taskListRefs.forEach(ref => {
+            batch.delete(ref);
+        })
+
+        // Tasks
+        taskRefs.forEach(ref => {
+            batch.delete(ref);
+        })
+
+        // Members
+        memberRefs.forEach(ref => {
+            batch.delete(ref);
+        })
+
+        memberIds.forEach(id => {
+            // Delete the RemoteId References of Members.
+            var remoteIdRef = admin.firestore().collection(USERS).doc(id).collection(REMOTE_IDS).doc(projectId);
+            batch.delete(remoteIdRef);
+
+            // Remove any unanswered Invites. Just in case.
+            var inviteRef = admin.firestore().collection(USERS).doc(id).collection(INVITES).doc(projectId);
+            batch.delete(inviteRef);
+        })
+
+        // Top Level Project Data.
+        batch.delete(initialRef);
+
+        // Execute the Batch.
+        return batch.commit().then(() => {
+            return { status: 'complete' }
+        }).catch(error => {
+            return {
+                status: 'error',
+                message: error.message
+            }
+        })
+    })  
+    
 })
 
 
