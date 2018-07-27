@@ -25,6 +25,64 @@ exports.removeUserFromDirectory = functions.auth.user().onDelete((user) => {
     })
 })
 
+exports.removeLocalTasksOrphanedFromTaskLists = functions.firestore.document('users/{userId}/taskLists/{taskListId}').onDelete((snapshot, context) => {
+    var userId = context.params.userId;
+    var taskListId = context.params.taskListId;
+
+    var taskQuery = admin.firestore().collection(USERS).doc(userId).collection(TASKS).where('tasklist', '==', taskListId);
+
+    return removeOrphanTasksAsync(taskQuery);
+})
+
+exports.removeRemoteTasksOrphanedFromTaskLists = functions.firestore.document('remotes/{projectId}/taskLists/{taskListId}').onDelete((snapshot, context) => {
+    var projectId = context.params.projectId;
+    var taskListId = context.params.taskListId;
+
+    var tasksQuery = admin.firestore().collection(REMOTES).doc(projectId).collection(TASKS).where('taskList', '==', taskListId);
+
+    return removeOrphanTasksAsync(tasksQuery);
+})
+
+function removeOrphanTasksAsync(query) {
+    return new Promise((resolve, reject) => {
+        var relatedTaskRefs = [];
+        query.get().then(snapshot => {
+            if (snapshot.empty !== true) {
+                snapshot.forEach(doc => {
+                    relatedTaskRefs.push(doc.ref);
+                })
+
+                batchDeleteTaskRefsAsync(relatedTaskRefs).then(() => {
+                    resolve();
+                }).catch(error => {
+                    reject(error);
+                })
+            }
+
+            else {
+                resolve();
+            }
+        })
+    })
+}
+
+function batchDeleteTaskRefsAsync(taskRefs) {
+    return new Promise((resolve, reject) => {
+        var batch = new FirestoreBatchPaginator(admin.firestore())
+
+        relatedTaskRefs.forEach(ref => {
+            batch.delete(ref);
+        })
+
+        batch.commit().then(() => {
+            // Success.
+            resolve();
+        }).catch(error => {
+            reject(error);
+        })
+    })
+}
+
 exports.getRemoteUserData = functions.https.onCall((data, context) => {
     var targetEmail = data.targetEmail;
 
