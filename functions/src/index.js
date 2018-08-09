@@ -29,7 +29,7 @@ exports.removeLocalTasksOrphanedFromTaskLists = functions.firestore.document('us
     var userId = context.params.userId;
     var taskListId = context.params.taskListId;
 
-    var taskQuery = admin.firestore().collection(USERS).doc(userId).collection(TASKS).where('tasklist', '==', taskListId);
+    var taskQuery = admin.firestore().collection(USERS).doc(userId).collection(TASKS).where('taskList', '==', taskListId);
 
     return removeOrphanTasksAsync(taskQuery);
 })
@@ -70,7 +70,7 @@ function batchDeleteTaskRefsAsync(taskRefs) {
     return new Promise((resolve, reject) => {
         var batch = new FirestoreBatchPaginator(admin.firestore())
 
-        relatedTaskRefs.forEach(ref => {
+        taskRefs.forEach(ref => {
             batch.delete(ref);
         })
 
