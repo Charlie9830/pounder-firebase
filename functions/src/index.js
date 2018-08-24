@@ -20,7 +20,7 @@ admin.initializeApp({
 });
 
 exports.removeUserFromDirectory = functions.auth.user().onDelete((user) => {
-    admin.firestore().collection(DIRECTORY).doc(user.email).delete().then(() => {
+    return admin.firestore().collection(DIRECTORY).doc(user.email).delete().then(() => {
         // Complete.
     })
 })
